@@ -24,29 +24,41 @@ const GenerateEquation = () => {
   const [total, setTotal] = useState(0);
   const [correct, setCorrect] = useState(0);
 
+  // State to store the color of the proposed answer span element
+  const [color, setColor] = useState({ color: 'purple' });
+
   // Calculate the true answer to the equation
   const trueAnswer =
     operator === '+' ? value1 + value2 + value3 : value1 - value2 - value3;
 
   useEffect(() => {
-    // Generate a proposed answer that is either correct or close to correct
+    // Generate a proposed answer that is either true
+    // or close to the true answer
     if (Math.random() < 0.9) {
       // Correct answer
       setProposedAnswer(trueAnswer);
     } else {
-      // Close to correct answer
+      // Close to true answer
       setProposedAnswer(trueAnswer + Math.floor(Math.random() * 3) - 1);
     }
   }, [value1, value2, value3, operator, trueAnswer]);
+
+  // state to control popup visibility
+  const [showPopup, setShowPopup] = useState(false);
 
   // Event handler for when "True" button is clicked
   const handleTrueClick = () => {
     // Increment total number of questions asked
     setTotal(total + 1);
 
-    // If proposed answer is correct, increment number of correct answers
+    // If proposed answer is true, increment number of correct answers
     if (proposedAnswer === trueAnswer) {
       setCorrect(correct + 1);
+      setColor({ color: '#71B53A' });
+      setShowPopup(false);
+    } else {
+      setShowPopup(!showPopup);
+      setColor({ color: '#FF4A40' });
     }
 
     // Wait 1 second before generating a new equation
@@ -55,7 +67,11 @@ const GenerateEquation = () => {
       setValue2(Math.floor(Math.random() * 10));
       setValue3(Math.floor(Math.random() * 10));
       setOperator(Math.random() < 0.5 ? '+' : '-');
-    }, 1000);
+
+      // reset color to purple for next equation
+      setColor({ color: '#C955FF' });
+      setShowPopup(false);
+    }, 1700);
   };
 
   // Event handler for when "False" button is clicked
@@ -63,9 +79,15 @@ const GenerateEquation = () => {
     // Increment total number of questions asked
     setTotal(total + 1);
 
-    // If proposed answer is incorrect, increment number of correct answers
+    // If proposed answer is false, increment number of correct answers
     if (proposedAnswer !== trueAnswer) {
       setCorrect(correct + 1);
+      setColor({ color: '#FF4A40' });
+      setShowPopup(false);
+    } else {
+      setShowPopup(!showPopup);
+      // If proposed answer is true, set color to red
+      setColor({ color: '#71B53A' });
     }
 
     // Wait 1 second before generating a new equation
@@ -74,11 +96,26 @@ const GenerateEquation = () => {
       setValue2(Math.floor(Math.random() * 10));
       setValue3(Math.floor(Math.random() * 10));
       setOperator(Math.random() < 0.5 ? '+' : '-');
-    }, 1000);
+      setColor({ color: 'purple' }); // reset color to purple for the next equation
+      setShowPopup(false);
+    }, 1700);
+  };
+
+  const Popup = ({ message }) => {
+    return (
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ ease: 'easeIn', duration: 1 }}
+        className=' text-center my-5'
+      >
+        {message}
+      </motion.div>
+    );
   };
 
   return (
-    <div className='generate-equation'>
+    <div>
       {/* Display total number of questions asked and number of correct answers */}
       <QuestionCounter total={total} correct={correct} />
       <div className='m-32 p-10 justify-center text-center  h-32 '>
@@ -86,16 +123,30 @@ const GenerateEquation = () => {
         <p className='text-3xl'>
           {value1} {operator} {value2} {operator} {value3} ={' '}
           {/* Animate color of proposed answer based on if correct or not */}
-          <motion.span
-            initial={{ color: 'purple' }}
-            animate={{ color: proposedAnswer === trueAnswer ? 'green' : 'red' }}
-            transition={{ duration: 1 }}
-            className='text-purple-500'
-          >
+          <motion.span animate={color} className=''>
             {proposedAnswer}
           </motion.span>
         </p>
+        {/* Popup component that displays a message */}
+        {showPopup && (
+          <Popup
+            message={
+              proposedAnswer === trueAnswer ? (
+                <>
+                  Aw! The answer was {trueAnswer}, which was{' '}
+                  <span className='text-green-500'>'True'</span>
+                </>
+              ) : (
+                <>
+                  Aw! The answer was {trueAnswer}, which was{' '}
+                  <span className='text-red-400'>'False'</span>
+                </>
+              )
+            }
+          />
+        )}
       </div>
+
       {/* Display the "True" and "False" buttons and pass in the event handlers as props */}
       <Buttons onTrue={handleTrueClick} onFalse={handleFalseClick} />
     </div>

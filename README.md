@@ -1,6 +1,8 @@
 # true-or-false
 
-true or false based equation game
+A true or false based equation game
+
+Just a fun project built with React, TailwindCSS, & the Framer Motion library 
 
 # Getting Started with Create React App
 
