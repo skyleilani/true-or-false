@@ -34,7 +34,9 @@ const GenerateEquation = () => {
   useEffect(() => {
     // Generate a proposed answer that is either true
     // or close to the true answer
-    if (Math.random() < 0.9) {
+
+    // proposedAnswer will be set to the true answer 4 times out of 10.
+    if (Math.random() < 0.4) {
       // Correct answer
       setProposedAnswer(trueAnswer);
     } else {
